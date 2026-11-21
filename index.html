@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laundrywala — Full POS, Invoice & Customer System</title>
+  <style>
+    :root {
+      --primary: #0f766e;
+      --primary-dark: #115e59;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: #fff;
+      padding: 14px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .brand h1 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .brand p {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 12.5px;
+    }
+
+    .pill {
+      background: rgba(255, 255, 255, 0.14);
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    nav {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 13px 15px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--primary);
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    main {
+      max-width: 1320px;
+      margin: 20px auto;
+      padding: 0 16px 40px;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .pos-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 940px) {
+      .pos-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .cat-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+
+    .cat-btn {
+      padding: 6px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .cat-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 13.5px;
+      margin-bottom: 12px;
+    }
+
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 9px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .item-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      background: #fff;
+      cursor: pointer;
+      transition: 0.15s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 5px;
+      text-align: left;
+    }
+
+    .item-card:hover {
+      border-color: var(--primary);
+      background: #f0fdfa;
+      transform: translateY(-1px);
+    }
+
+    .item-cat {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .item-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .item-price {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+
+    .customer-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 540px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .cart-table-wrap {
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: var(--muted);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .qty-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .qty-btn {
+      width: 23px;
+      height: 23px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .summary-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 13.5px;
+    }
+
+    .summary-line.total {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--primary-dark);
+      border-top: 1px dashed var(--border);
+      padding-top: 8px;
+      margin-top: 6px;
+    }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: var(--text);
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .btn-sm {
+      padding: 5px 9px;
+      font-size: 12px;
+      border-radius: 7px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 21px;
+      font-weight: 800;
+      margin-top: 5px;
+      color: var(--primary-dark);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .status-open {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-closed {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .backup-note {
+      background: #f8fafc;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-top: 14px;
+      line-height: 1.5;
+    }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      z-index: 50;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 14px;
+      max-width: 390px;
+      width: 100%;
+      padding: 18px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .receipt {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 12px;
+      line-height: 1.45;
+      color: #000;
+    }
+
+    .receipt-center {
+      text-align: center;
+    }
+
+    .receipt-line {
+      border-top: 1px dashed #000;
+      margin: 7px 0;
+    }
+
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printArea, #printArea * {
+        visibility: visible;
+      }
+      #printArea {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 58mm;
+        padding: 3mm;
+        background: #fff;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-badge">LW</div>
+      <div>
+        <h1>Laundrywala</h1>
+        <p>Phone: 01872720582 • Email: laundrywala72720@gmail.com</p>
+      </div>
+    </div>
+    <div class="header-meta">
+      <span class="pill" id="totalCatalogPill">Catalog: 0 Items</span>
+      <span class="pill" id="todayDatePill"></span>
+      <span class="pill" id="dayStatusPill">Day: Open</span>
+    </div>
+  </header>
+
+  <nav>
+    <button class="tab-btn active" onclick="switchTab('posTab', this)">🧾 Billing & Invoice</button>
+    <button class="tab-btn" onclick="switchTab('priceTab', this)">💰 Add / Edit Price List</button>
+    <button class="tab-btn" onclick="switchTab('dailyTab', this)">📊 Daily Sales & Day End</button>
+    <button class="tab-btn" onclick="switchTab('customersTab', this)">👥 Customers</button>
+    <button class="tab-btn" onclick="switchTab('monthlyTab', this)">📅 Monthly Sales & Backup</button>
+  </nav>
+
+  <main>
+    <!-- TAB 1: POS & INVOICE -->
+    <section id="posTab" class="tab-content active">
+      <div class="pos-grid">
+        <div class="card">
+          <div class="card-title">
+            <span>Service & Price List (Auto Price)</span>
+            <span style="font-size:12px; color:var(--muted);" id="shownItemsCount"></span>
+          </div>
+
+          <div class="cat-filters" id="categoryFilters">
+            <button class="cat-btn active" onclick="filterCategory('All', this)">All</button>
+            <button class="cat-btn" onclick="filterCategory('Only Iron', this)">Only Iron (৳15+)</button>
+            <button class="cat-btn" onclick="filterCategory('Wash & Iron', this)">Wash & Iron (৳50+)</button>
+            <button class="cat-btn" onclick="filterCategory('Dry Clean', this)">Dry Clean</button>
+            <button class="cat-btn" onclick="filterCategory('Heavy & Home', this)">Heavy & Home</button>
+            <button class="cat-btn" onclick="filterCategory('Special Care', this)">Special Care</button>
+          </div>
+
+          <input
+            type="text"
+            class="search-input"
+            id="itemSearch"
+            placeholder="আইটেমের নাম লিখে খুঁজুন (যেমন: Shirt, Panjabi, Suit, Blanket)..."
+            oninput="renderServices()"
+          />
+
+          <div class="items-grid" id="servicesGrid"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>New Invoice</span>
+            <span style="font-size:12px; color:var(--muted);" id="nextInvLabel"></span>
+          </div>
+
+          <div class="customer-box">
+            <div class="form-row">
+              <div>
+                <label>Customer Phone *</label>
+                <input
+                  type="text"
+                  id="custPhone"
+                  list="customerPhoneList"
+                  placeholder="01XXXXXXXXX"
+                  oninput="autoFillCustomer()"
+                />
+                <datalist id="customerPhoneList"></datalist>
+              </div>
+              <div>
+                <label>Customer Name *</label>
+                <input type="text" id="custName" placeholder="কাস্টমারের নাম" />
+              </div>
+            </div>
+            <div class="form-row" style="margin-bottom:0;">
+              <div>
+                <label>Address</label>
+                <input type="text" id="custAddress" placeholder="ঠিকানা (ঐচ্ছিক)" />
+              </div>
+              <div>
+                <label>Delivery Date</label>
+                <input type="date" id="deliveryDate" />
+              </div>
+            </div>
+          </div>
+
+          <div class="cart-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Rate</th>
+                  <th>Qty</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="cartBody">
+                <tr>
+                  <td colspan="5" style="text-align:center; color:var(--muted); padding:20px;">
+                    বাম পাশ থেকে সার্ভিস সিলেক্ট করুন
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="summary-box">
+            <div class="summary-line">
+              <span>Subtotal</span>
+              <strong id="subtotalText">৳0</strong>
+            </div>
+            <div class="form-row" style="margin-top:8px; margin-bottom:8px;">
+              <div>
+                <label>Discount (৳)</label>
+                <input type="number" id="discountInput" value="0" min="0" oninput="updateSummary()" />
+              </div>
+              <div>
+                <label>Paid Amount (৳)</label>
+                <input type="number" id="paidInput" value="0" min="0" oninput="updateSummary()" />
+              </div>
+            </div>
+            <div class="summary-line">
+              <span>Due (বাকি)</span>
+              <strong id="dueText" style="color:var(--danger);">৳0</strong>
+            </div>
+            <div class="summary-line total">
+              <span>Grand Total</span>
+              <span id="grandTotalText">৳0</span>
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-secondary" onclick="clearCart()">Clear</button>
+            <button class="btn btn-primary" onclick="saveAndPrintInvoice()">Save & Print Invoice</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: ADD / EDIT PRICE LIST -->
+    <section id="priceTab" class="tab-content">
+      <div class="pos-grid">
+        <div class="card">
+          <div class="card-title">
+            <span id="priceFormTitle">➕ Add New Product / Service Price</span>
+            <button class="btn btn-secondary btn-sm" onclick="resetPriceForm()">Reset</button>
+          </div>
+
+          <input type="hidden" id="editServiceId" />
+
+          <div style="margin-bottom:10px;">
+            <label>Service / Item Name *</label>
+            <input type="text" id="srvNameInput" placeholder="যেমন: Linen Shirt বা Winter Coat" />
+          </div>
+
+          <div class="form-row">
+            <div>
+              <label>Category *</label>
+              <select id="srvCategoryInput">
+                <option value="Only Iron">Only Iron</option>
+                <option value="Wash & Iron">Wash & Iron</option>
+                <option value="Dry Clean">Dry Clean</option>
+                <option value="Heavy & Home">Heavy & Home</option>
+                <option value="Special Care">Special Care</option>
+              </select>
+            </div>
+            <div>
+              <label>Price (৳) *</label>
+              <input type="number" id="srvPriceInput" min="0" placeholder="যেমন: 50" />
+            </div>
+          </div>
+
+          <div class="btn-group" style="margin-top:12px;">
+            <button class="btn btn-primary" onclick="saveServicePrice()">💾 Save Price</button>
+            <button class="btn btn-danger" onclick="resetDefaultCatalog()">↺ Reset Default List</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>All Services & Prices (<span id="manageCountLabel">0</span>)</span>
+          </div>
+
+          <input
+            type="text"
+            class="search-input"
+            id="managePriceSearch"
+            placeholder="প্রাইস লিস্টে নাম বা ক্যাটাগরি দিয়ে খুঁজুন..."
+            oninput="renderManagePrices()"
+          />
+
+          <div style="max-height:460px; overflow-y:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="managePricesBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: DAILY SALES & DAY END -->
+    <section id="dailyTab" class="tab-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Today's Total Sales</div>
+          <div class="stat-value" id="dailyTotalSales">৳0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Today's Collected (Paid)</div>
+          <div class="stat-value" id="dailyTotalPaid">৳0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Today's Due</div>
+          <div class="stat-value" id="dailyTotalDue" style="color:var(--danger);">৳0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Invoices Today</div>
+          <div class="stat-value" id="dailyInvoiceCount">0</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>Today's Sales List (<span id="dailyDateLabel"></span>)</span>
+          <button class="btn btn-primary btn-sm" id="closeDayBtn" onclick="closeDay()">🔒 Close Day (Day End)</button>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Total</th>
+                <th>Paid</th>
+                <th>Due</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="dailyInvoicesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: CUSTOMERS -->
+    <section id="customersTab" class="tab-content">
+      <div class="pos-grid">
+        <div class="card">
+          <div class="card-title"><span>Add / Update Customer</span></div>
+          <div class="form-row">
+            <div>
+              <label>Customer Name *</label>
+              <input type="text" id="newCustName" placeholder="নাম লিখুন" />
+            </div>
+            <div>
+              <label>Phone Number *</label>
+              <input type="text" id="newCustPhone" placeholder="01XXXXXXXXX" />
+            </div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label>Address</label>
+            <input type="text" id="newCustAddress" placeholder="বাড়ি/রোড/এলাকা" />
+          </div>
+          <button class="btn btn-primary" onclick="addCustomerFromForm()">Save Customer</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span>Saved Customers</span></div>
+          <input
+            type="text"
+            class="search-input"
+            id="custSearch"
+            placeholder="নাম বা ফোন দিয়ে খুঁজুন..."
+            oninput="renderCustomers()"
+          />
+          <div style="max-height:380px; overflow-y:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Address</th>
+                  <th>Orders</th>
+                </tr>
+              </thead>
+              <tbody id="customersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: MONTHLY SALES & BACKUP -->
+    <section id="monthlyTab" class="tab-content">
+      <div class="card" style="margin-bottom:18px;">
+        <div class="card-title">
+          <span>Monthly Sales Report</span>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <input
+              type="month"
+              id="monthPicker"
+              style="width:auto;"
+              onchange="renderMonthlyReport()"
+            />
+            <button class="btn btn-secondary btn-sm" onclick="exportBackupJSON()">⬇️ Download Backup</button>
+            <label class="btn btn-secondary btn-sm" style="margin:0; cursor:pointer;">
+              ⬆️ Restore Backup
+              <input type="file" accept=".json" style="display:none;" onchange="importBackupJSON(event)" />
+            </label>
+          </div>
+        </div>
+
+        <div class="stats-grid" style="margin-bottom:0;">
+          <div class="stat-card">
+            <div class="stat-label">Monthly Sales</div>
+            <div class="stat-value" id="monthlyTotalSales">৳0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Monthly Collected</div>
+            <div class="stat-value" id="monthlyTotalPaid">৳0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Monthly Due</div>
+            <div class="stat-value" id="monthlyTotalDue" style="color:var(--danger);">৳0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Days Closed</div>
+            <div class="stat-value" id="monthlyClosedDays">0</div>
+          </div>
+        </div>
+
+        <div class="backup-note">
+          <strong>নিজের কাছে ডাটা সংরক্ষণ:</strong> সব বিল, কাস্টমার ও প্রাইস লিস্ট ব্রাউজারে সেভ থাকে (মাসে সাধারণত ১–৩ MB-এর মতো সামান্য জায়গা লাগে)। নিয়মিত <strong>Download Backup</strong> দিয়ে JSON ফাইল নিজের ফোনে, PC-তে বা Google Drive-এ রেখে দিলে ডাটা সবসময় নিরাপদ থাকবে।
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>Date-wise Breakdown</span></div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Invoices</th>
+                <th>Total Sales</th>
+                <th>Paid</th>
+                <th>Due</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="monthlyBreakdownBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- RECEIPT PRINT MODAL -->
+  <div class="modal-backdrop" id="receiptModal">
+    <div class="modal-box">
+      <div id="printArea">
+        <div class="receipt" id="receiptContent"></div>
+      </div>
+      <div class="btn-group no-print" style="margin-top:16px;">
+        <button class="btn btn-secondary" onclick="closeReceiptModal()">Close</button>
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Print</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function buildDefaultServices() {
+      const list = [];
+      let id = 1;
+      const add = (name, category, price) => list.push({ id: id++, name, category, price });
+
+      const ironItems = [
+        ["2 Pieces Combo (Only Iron)", 25],
+        ["Shirt (1 pc)", 15], ["T-Shirt (1 pc)", 15], ["Pajama (1 pc)", 15], ["Inner / Vest (1 pc)", 15],
+        ["Handkerchief (1 pc)", 15], ["Scarf / Muffler (1 pc)", 15], ["Apron (1 pc)", 15], ["Cap / Hat (1 pc)", 15],
+        ["Pant (1 pc)", 20], ["Jeans Pant (1 pc)", 20], ["Trouser / Jogger (1 pc)", 20], ["Panjabi (1 pc)", 20],
+        ["Polo Shirt (1 pc)", 20], ["Casual Shirt (1 pc)", 20], ["Formal Shirt (1 pc)", 20], ["Chinos (1 pc)", 20],
+        ["Cargo Pant (1 pc)", 20], ["Shorts / Half Pant (1 pc)", 20], ["Kurti (1 pc)", 25], ["Tops (1 pc)", 20],
+        ["Palazzo (1 pc)", 25], ["Leggings (1 pc)", 15], ["Dupatta / Orna (1 pc)", 20], ["Salwar Kameez (1 set)", 30],
+        ["Cotton Saree", 35], ["Georgette Saree", 35], ["Chiffon Saree", 35], ["Half Silk Saree", 40],
+        ["Pillow Cover (1 pc)", 15], ["Cushion Cover (1 pc)", 15], ["Towel (1 pc)", 20], ["Bath Towel (1 pc)", 25],
+        ["Bedsheet Single", 35], ["Bedsheet Double", 45], ["Table Cloth", 30], ["Prayer Mat / Jaynamaz", 25],
+        ["School Uniform Shirt", 15], ["School Uniform Pant", 20], ["School Tie / Belt", 15], ["Lab Coat / Apron", 25]
+      ];
+      ironItems.forEach(([n, p]) => add(n, "Only Iron", p));
+
+      const washIronItems = [
+        ["Shirt", 50], ["T-Shirt", 50], ["Pajama", 50], ["Pillow Cover", 50], ["Inner / Vest", 50],
+        ["Scarf / Muffler", 50], ["Cap / Hat", 50], ["Handkerchief", 50], ["Apron", 50], ["Socks (Pair)", 50],
+        ["Polo Shirt", 55], ["Casual Shirt", 55], ["Formal Shirt", 55], ["Linen Shirt", 60], ["Tank Top", 50],
+        ["Pant", 60], ["Jeans Pant", 60], ["Panjabi", 60], ["Towel", 60], ["Bath Towel", 65],
+        ["Trouser", 60], ["Track Pant / Jogger", 60], ["Cargo Pant", 65], ["Chinos Pant", 65], ["Shorts", 50],
+        ["Short Panjabi", 60], ["Fatua", 55], ["Kurti", 65], ["Tops", 60], ["Blouse", 50],
+        ["Petticoat / Saya", 55], ["Palazzo", 65], ["Leggings", 50], ["Dupatta / Orna", 55], ["Shawl (Cotton)", 70],
+        ["Bedsheet Single", 80], ["Bedsheet Double", 110], ["Salwar Kameez (2-Pc)", 85], ["Salwar Kameez (3-Pc)", 95],
+        ["Cotton Saree", 110], ["Taat Saree", 110], ["Georgette Saree", 100], ["Chiffon Saree", 100],
+        ["Table Runner", 65], ["Table Cloth (Small)", 75], ["Table Cloth (Large)", 100], ["Chair Cover", 55],
+        ["Kitchen Towel", 50], ["Gym Wear Set", 80], ["Sports Jersey", 55], ["School Dress Set", 85],
+        ["Office Uniform Shirt", 55], ["Office Uniform Pant", 60], ["Nighty / Gown", 70], ["Boxer / Shorts", 50],
+        ["Baby Dress (Small)", 50], ["Baby Dress (Set)", 70], ["Napkin Set (3 pcs)", 55], ["Cushion Cover (2 pcs)", 60]
+      ];
+      washIronItems.forEach(([n, p]) => add(n, "Wash & Iron", p));
+
+      const dryCleanItems = [
+        ["Jacket (Light)", 150], ["Hoodie", 150], ["Sweater (Light)", 130], ["Cardigan", 140],
+        ["Silk Saree", 180], ["Jamdani Saree", 180], ["Katan Saree", 220], ["Banarasi Saree", 250],
+        ["Muslin Saree", 200], ["Georgette Party Saree", 170], ["Net Saree", 190], ["Blazer (Single)", 180],
+        ["Suit 2-Piece", 250], ["Suit 3-Piece", 320], ["Coat / Overcoat", 260], ["Leather Jacket", 380],
+        ["Puffer Jacket", 240], ["Sherwani", 350], ["Lehenga", 350], ["Bridal Lehenga", 550],
+        ["Gown / Party Dress", 260], ["Kabli Set", 190], ["Designer Panjabi", 140], ["Designer Salwar Kameez", 180],
+        ["Woolen Shawl", 160], ["Kashmiri Shawl", 250], ["Pashmina Shawl", 220], ["Tie / Bowtie", 60],
+        ["Waistcoat / Modi Coat", 140], ["Trench Coat", 280], ["Wedding Dress / Suit", 450], ["Velvet Dress", 220]
+      ];
+      dryCleanItems.forEach(([n, p]) => add(n, "Dry Clean", p));
+
+      const heavyItems = [
+        ["Curtain / Porda (Small)", 80], ["Curtain / Porda (Medium)", 100], ["Curtain / Porda (Large)", 130],
+        ["Sheer Curtain", 85], ["Blackout Curtain", 140], ["Blanket Single", 200], ["Blanket Double", 300],
+        ["Comforter / Duvet Single", 220], ["Comforter / Duvet Double", 320], ["Quilt / Lep (Single)", 220],
+        ["Quilt / Lep (Double)", 320], ["Mattress Protector Single", 160], ["Mattress Protector Double", 220],
+        ["Sofa Cover (1 Seat)", 80], ["Sofa Cover Set (5 Seat)", 360], ["Sofa Cover Set (7 Seat)", 480],
+        ["Carpet Cleaning (Small)", 150], ["Carpet Cleaning (Medium)", 280], ["Carpet Cleaning (Large)", 450],
+        ["Rug / Mat (Small)", 100], ["Rug / Mat (Large)", 200], ["Bean Bag Cover", 180],
+        ["Pillow (With Wash)", 120], ["Cushion (With Wash)", 90], ["Sleeping Bag", 250], ["Mosquito Net / Mashari", 90]
+      ];
+      heavyItems.forEach(([n, p]) => add(n, "Heavy & Home", p));
+
+      const specialItems = [
+        ["Stain Removal (Single Spot)", 70], ["White Shirt Whitening", 80], ["Color Bleed Treatment", 120],
+        ["Shoe Cleaning (Sneakers)", 150], ["Shoe Cleaning (Formal)", 140], ["Shoe Cleaning (Boots)", 200],
+        ["Bag Cleaning (Small/Hand)", 150], ["Bag Cleaning (Backpack)", 180], ["Bag Cleaning (Travel/Duffel)", 250],
+        ["Cap / Helmet Liner Care", 90], ["Baby Stroller Cover", 220], ["Car Seat Cover (Per Seat)", 160],
+        ["Lint & Fuzz Removal", 90], ["Steam Press (Single Item)", 45], ["Express 24h Service Charge", 60],
+        ["Pickup & Drop Delivery", 50], ["Anti-Bacterial Sanitizing", 70], ["Softener & Fragrance Boost", 40],
+        ["Moth Proof Packing", 50], ["Hanger Packing Charge", 30]
+      ];
+      specialItems.forEach(([n, p]) => add(n, "Special Care", p));
+
+      return list;
+    }
+
+    const STORAGE_KEYS = {
+      services: "lw_services_final_v1",
+      invoices: "lw_invoices_final_v1",
+      customers: "lw_customers_final_v1",
+      closedDays: "lw_closed_days_final_v1"
+    };
+
+    function loadData(key, fallback) {
+      try {
+        const val = JSON.parse(localStorage.getItem(key));
+        return val ?? fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveData(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    let services = loadData(STORAGE_KEYS.services, null);
+    if (!Array.isArray(services) || services.length === 0) {
+      services = buildDefaultServices();
+      saveData(STORAGE_KEYS.services, services);
+    }
+
+    let invoices = loadData(STORAGE_KEYS.invoices, []);
+    let customers = loadData(STORAGE_KEYS.customers, []);
+    let closedDays = loadData(STORAGE_KEYS.closedDays, []);
+
+    let selectedCategory = "All";
+    let cart = [];
+
+    function getTodayISO() {
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      return new Date(now - offset).toISOString().slice(0, 10);
+    }
+
+    function getDefaultDeliveryISO() {
+      const d = new Date();
+      d.setDate(d.getDate() + 2);
+      const offset = d.getTimezoneOffset() * 60000;
+      return new Date(d - offset).toISOString().slice(0, 10);
+    }
+
+    function formatBDT(amount) {
+      return "৳" + Number(amount || 0).toLocaleString("en-US");
+    }
+
+    function updateCatalogCountBadge() {
+      document.getElementById("totalCatalogPill").textContent = "Catalog: " + services.length + " Items";
+      document.getElementById("manageCountLabel").textContent = services.length;
+    }
+
+    function switchTab(tabId, btnEl) {
+      document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
+      document.getElementById(tabId).classList.add("active");
+      btnEl.classList.add("active");
+
+      if (tabId === "posTab") renderServices();
+      if (tabId === "priceTab") renderManagePrices();
+      if (tabId === "dailyTab") renderDailyTab();
+      if (tabId === "customersTab") renderCustomers();
+      if (tabId === "monthlyTab") renderMonthlyReport();
+    }
+
+    function filterCategory(cat, btnEl) {
+      selectedCategory = cat;
+      document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+      btnEl.classList.add("active");
+      renderServices();
+    }
+
+    function renderServices() {
+      const q = document.getElementById("itemSearch").value.trim().toLowerCase();
+      const grid = document.getElementById("servicesGrid");
+      const filtered = services.filter(item => {
+        const matchCat = selectedCategory === "All" || item.category === selectedCategory;
+        const matchText = !q || item.name.toLowerCase().includes(q) || item.category.toLowerCase().includes(q);
+        return matchCat && matchText;
+      });
+
+      document.getElementById("shownItemsCount").textContent = filtered.length + " items shown";
+
+      grid.innerHTML = filtered.map(item => `
+        <button class="item-card" onclick="addToCart(${item.id})">
+          <span class="item-cat">${item.category}</span>
+          <span class="item-name">${item.name}</span>
+          <span class="item-price">${formatBDT(item.price)}</span>
+        </button>
+      `).join("");
+    }
+
+    function saveServicePrice() {
+      const idVal = document.getElementById("editServiceId").value;
+      const name = document.getElementById("srvNameInput").value.trim();
+      const category = document.getElementById("srvCategoryInput").value;
+      const price = Number(document.getElementById("srvPriceInput").value);
+
+      if (!name || isNaN(price) || price < 0) {
+        alert("সঠিক প্রোডাক্ট/সার্ভিসের নাম এবং প্রাইস (৳) দিন।");
+        return;
+      }
+
+      if (idVal) {
+        const idx = services.findIndex(s => s.id === Number(idVal));
+        if (idx !== -1) {
+          services[idx].name = name;
+          services[idx].category = category;
+          services[idx].price = price;
+        }
+      } else {
+        const nextId = services.reduce((max, s) => Math.max(max, s.id), 0) + 1;
+        services.unshift({ id: nextId, name, category, price });
+      }
+
+      saveData(STORAGE_KEYS.services, services);
+      updateCatalogCountBadge();
+      resetPriceForm();
+      renderManagePrices();
+      renderServices();
+      alert("প্রাইস লিস্ট আপডেট হয়েছে!");
+    }
+
+    function startEditService(id) {
+      const srv = services.find(s => s.id === id);
+      if (!srv) return;
+      document.getElementById("editServiceId").value = srv.id;
+      document.getElementById("srvNameInput").value = srv.name;
+      document.getElementById("srvCategoryInput").value = srv.category;
+      document.getElementById("srvPriceInput").value = srv.price;
+      document.getElementById("priceFormTitle").textContent = "✏️ Edit Product / Price";
+    }
+
+    function deleteService(id) {
+      if (!confirm("এই আইটেমটি প্রাইস লিস্ট থেকে মুছে ফেলতে চাচ্ছো?")) return;
+      services = services.filter(s => s.id !== id);
+      saveData(STORAGE_KEYS.services, services);
+      updateCatalogCountBadge();
+      renderManagePrices();
+      renderServices();
+    }
+
+    function resetPriceForm() {
+      document.getElementById("editServiceId").value = "";
+      document.getElementById("srvNameInput").value = "";
+      document.getElementById("srvPriceInput").value = "";
+      document.getElementById("priceFormTitle").textContent = "➕ Add New Product / Service Price";
+    }
+
+    function resetDefaultCatalog() {
+      if (!confirm("ডিফল্ট প্রাইস লিস্টে রিসেট করতে চাচ্ছো?")) return;
+      services = buildDefaultServices();
+      saveData(STORAGE_KEYS.services, services);
+      updateCatalogCountBadge();
+      resetPriceForm();
+      renderManagePrices();
+      renderServices();
+    }
+
+    function renderManagePrices() {
+      const q = document.getElementById("managePriceSearch").value.trim().toLowerCase();
+      const tbody = document.getElementById("managePricesBody");
+      const list = services.filter(s =>
+        !q || s.name.toLowerCase().includes(q) || s.category.toLowerCase().includes(q)
+      );
+
+      tbody.innerHTML = list.map(s => `
+        <tr>
+          <td><strong>${s.name}</strong></td>
+          <td>${s.category}</td>
+          <td><strong>${formatBDT(s.price)}</strong></td>
+          <td style="white-space:nowrap;">
+            <button class="btn btn-secondary btn-sm" onclick="startEditService(${s.id})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteService(${s.id})">×</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function addToCart(serviceId) {
+      const service = services.find(s => s.id === serviceId);
+      if (!service) return;
+      const existing = cart.find(c => c.id === serviceId);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({ ...service, qty: 1 });
+      }
+      renderCart();
+    }
+
+    function changeQty(serviceId, delta) {
+      const idx = cart.findIndex(c => c.id === serviceId);
+      if (idx === -1) return;
+      cart[idx].qty += delta;
+      if (cart[idx].qty <= 0) cart.splice(idx, 1);
+      renderCart();
+    }
+
+    function clearCart() {
+      cart = [];
+      document.getElementById("discountInput").value = 0;
+      document.getElementById("paidInput").value = 0;
+      renderCart();
+    }
+
+    function renderCart() {
+      const tbody = document.getElementById("cartBody");
+      if (cart.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align:center; color:var(--muted); padding:20px;">
+              বাম পাশ থেকে সার্ভিস সিলেক্ট করুন
+            </td>
+          </tr>`;
+        updateSummary();
+        return;
+      }
+
+      tbody.innerHTML = cart.map(item => `
+        <tr>
+          <td>${item.name}</td>
+          <td>${formatBDT(item.price)}</td>
+          <td>
+            <div class="qty-controls">
+              <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
+              <span>${item.qty}</span>
+              <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+            </div>
+          </td>
+          <td><strong>${formatBDT(item.price * item.qty)}</strong></td>
+          <td><button class="btn btn-danger btn-sm" onclick="changeQty(${item.id}, -${item.qty})">×</button></td>
+        </tr>
+      `).join("");
+
+      updateSummary();
+    }
+
+    function updateSummary() {
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const discount = Math.max(0, Number(document.getElementById("discountInput").value) || 0);
+      const grandTotal = Math.max(0, subtotal - discount);
+      const paid = Math.max(0, Number(document.getElementById("paidInput").value) || 0);
+      const due = Math.max(0, grandTotal - paid);
+
+      document.getElementById("subtotalText").textContent = formatBDT(subtotal);
+      document.getElementById("grandTotalText").textContent = formatBDT(grandTotal);
+      document.getElementById("dueText").textContent = formatBDT(due);
+      return { subtotal, discount, grandTotal, paid, due };
+    }
+
+    function autoFillCustomer() {
+      const phone = document.getElementById("custPhone").value.trim();
+      const found = customers.find(c => c.phone === phone);
+      if (found) {
+        document.getElementById("custName").value = found.name;
+        document.getElementById("custAddress").value = found.address || "";
+      }
+    }
+
+    function refreshCustomerDatalist() {
+      const dl = document.getElementById("customerPhoneList");
+      dl.innerHTML = customers.map(c => `<option value="${c.phone}">${c.name}</option>`).join("");
+    }
+
+    function upsertCustomer(name, phone, address) {
+      if (!phone) return;
+      const existing = customers.find(c => c.phone === phone);
+      if (existing) {
+        existing.name = name || existing.name;
+        if (address) existing.address = address;
+      } else {
+        customers.push({ name: name || "Walk-in Customer", phone, address: address || "" });
+      }
+      saveData(STORAGE_KEYS.customers, customers);
+      refreshCustomerDatalist();
+    }
+
+    function addCustomerFromForm() {
+      const name = document.getElementById("newCustName").value.trim();
+      const phone = document.getElementById("newCustPhone").value.trim();
+      const address = document.getElementById("newCustAddress").value.trim();
+      if (!name || !phone) {
+        alert("কাস্টমারের নাম এবং ফোন নম্বর দিন।");
+        return;
+      }
+      upsertCustomer(name, phone, address);
+      document.getElementById("newCustName").value = "";
+      document.getElementById("newCustPhone").value = "";
+      document.getElementById("newCustAddress").value = "";
+      alert("কাস্টমার তথ্য সেভ হয়েছে!");
+      renderCustomers();
+    }
+
+    function saveAndPrintInvoice() {
+      const today = getTodayISO();
+      if (closedDays.includes(today)) {
+        alert("আজকের Day End ইতিমধ্যে ক্লোজ করা হয়েছে।");
+        return;
+      }
+      if (cart.length === 0) {
+        alert("অন্তত একটি সার্ভিস অ্যাড করুন।");
+        return;
+      }
+      const phone = document.getElementById("custPhone").value.trim();
+      const name = document.getElementById("custName").value.trim();
+      const address = document.getElementById("custAddress").value.trim();
+      const deliveryDate = document.getElementById("deliveryDate").value || getDefaultDeliveryISO();
+
+      if (!phone || !name) {
+        alert("কাস্টমারের নাম ও ফোন নম্বর দিন।");
+        return;
+      }
+
+      upsertCustomer(name, phone, address);
+
+      const { subtotal, discount, grandTotal, paid, due } = updateSummary();
+      const invNumber = "LW-" + String(invoices.length + 1001);
+
+      const invoice = {
+        invNumber,
+        date: today,
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        deliveryDate,
+        customer: { name, phone, address },
+        items: cart.map(c => ({ name: c.name, price: c.price, qty: c.qty, total: c.price * c.qty })),
+        subtotal,
+        discount,
+        grandTotal,
+        paid,
+        due
+      };
+
+      invoices.unshift(invoice);
+      saveData(STORAGE_KEYS.invoices, invoices);
+
+      clearCart();
+      document.getElementById("custPhone").value = "";
+      document.getElementById("custName").value = "";
+      document.getElementById("custAddress").value = "";
+      document.getElementById("deliveryDate").value = getDefaultDeliveryISO();
+      updateNextInvLabel();
+      openReceipt(invoice);
+    }
+
+    function openReceipt(inv) {
+      const rowsHtml = inv.items.map(i => `
+        <div class="receipt-row">
+          <span>${i.name} x${i.qty}</span>
+          <span>${formatBDT(i.total)}</span>
+        </div>
+      `).join("");
+
+      document.getElementById("receiptContent").innerHTML = `
+        <div class="receipt-center">
+          <strong style="font-size:15px;">Laundrywala</strong><br/>
+          01872720582<br/>
+          laundrywala72720@gmail.com
+        </div>
+        <div class="receipt-line"></div>
+        <div class="receipt-row"><span>${inv.invNumber}</span><span>${inv.date}</span></div>
+        <div>Cust: ${inv.customer.name} (${inv.customer.phone})</div>
+        <div>Deliv: ${inv.deliveryDate}</div>
+        <div class="receipt-line"></div>
+        ${rowsHtml}
+        <div class="receipt-line"></div>
+        <div class="receipt-row"><span>Subtotal</span><span>${formatBDT(inv.subtotal)}</span></div>
+        <div class="receipt-row"><span>Discount</span><span>${formatBDT(inv.discount)}</span></div>
+        <div class="receipt-row"><strong>Total</strong><strong>${formatBDT(inv.grandTotal)}</strong></div>
+        <div class="receipt-row"><span>Paid</span><span>${formatBDT(inv.paid)}</span></div>
+        <div class="receipt-row"><strong>Due</strong><strong>${formatBDT(inv.due)}</strong></div>
+        <div class="receipt-line"></div>
+        <div class="receipt-center">Thank you for choosing Laundrywala!</div>
+      `;
+      document.getElementById("receiptModal").classList.add("show");
+    }
+
+    function closeReceiptModal() {
+      document.getElementById("receiptModal").classList.remove("show");
+    }
+
+    function renderDailyTab() {
+      const today = getTodayISO();
+      document.getElementById("dailyDateLabel").textContent = today;
+      const todayInvs = invoices.filter(i => i.date === today);
+
+      const totalSales = todayInvs.reduce((s, i) => s + i.grandTotal, 0);
+      const totalPaid = todayInvs.reduce((s, i) => s + i.paid, 0);
+      const totalDue = todayInvs.reduce((s, i) => s + i.due, 0);
+
+      document.getElementById("dailyTotalSales").textContent = formatBDT(totalSales);
+      document.getElementById("dailyTotalPaid").textContent = formatBDT(totalPaid);
+      document.getElementById("dailyTotalDue").textContent = formatBDT(totalDue);
+      document.getElementById("dailyInvoiceCount").textContent = todayInvs.length;
+
+      const isClosed = closedDays.includes(today);
+      const closeBtn = document.getElementById("closeDayBtn");
+      closeBtn.disabled = isClosed;
+      closeBtn.textContent = isClosed ? "✅ Day Closed" : "🔒 Close Day (Day End)";
+
+      const tbody = document.getElementById("dailyInvoicesBody");
+      if (todayInvs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--muted); padding:18px;">আজ এখনো কোনো সেলস হয়নি।</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = todayInvs.map(inv => `
+        <tr>
+          <td><strong>${inv.invNumber}</strong></td>
+          <td>${inv.customer.name}</td>
+          <td>${inv.customer.phone}</td>
+          <td>${formatBDT(inv.grandTotal)}</td>
+          <td>${formatBDT(inv.paid)}</td>
+          <td style="color:${inv.due > 0 ? "var(--danger)" : "var(--success)"}; font-weight:700;">${formatBDT(inv.due)}</td>
+          <td><button class="btn btn-secondary btn-sm" onclick='openReceipt(${JSON.stringify(inv)})'>Receipt</button></td>
+        </tr>
+      `).join("");
+    }
+
+    function closeDay() {
+      const today = getTodayISO();
+      if (closedDays.includes(today)) return;
+      if (!confirm(`${today} তারিখের সেলস হিসাব ক্লোজ (Day End) করতে চাচ্ছো?`)) return;
+      closedDays.push(today);
+      saveData(STORAGE_KEYS.closedDays, closedDays);
+      updateHeaderStatus();
+      renderDailyTab();
+      alert("আজকের Day End সফলভাবে সম্পন্ন হয়েছে!");
+    }
+
+    function renderCustomers() {
+      const q = document.getElementById("custSearch").value.trim().toLowerCase();
+      const tbody = document.getElementById("customersTableBody");
+      const list = customers.filter(c =>
+        !q || c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q)
+      );
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--muted); padding:16px;">কোনো কাস্টমার পাওয়া যায়নি।</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(c => {
+        const orderCount = invoices.filter(i => i.customer.phone === c.phone).length;
+        return `
+          <tr>
+            <td><strong>${c.name}</strong></td>
+            <td>${c.phone}</td>
+            <td>${c.address || "-"}</td>
+            <td>${orderCount}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderMonthlyReport() {
+      const monthVal = document.getElementById("monthPicker").value;
+      const monthInvs = invoices.filter(i => i.date.startsWith(monthVal));
+
+      const totalSales = monthInvs.reduce((s, i) => s + i.grandTotal, 0);
+      const totalPaid = monthInvs.reduce((s, i) => s + i.paid, 0);
+      const totalDue = monthInvs.reduce((s, i) => s + i.due, 0);
+      const closedCount = closedDays.filter(d => d.startsWith(monthVal)).length;
+
+      document.getElementById("monthlyTotalSales").textContent = formatBDT(totalSales);
+      document.getElementById("monthlyTotalPaid").textContent = formatBDT(totalPaid);
+      document.getElementById("monthlyTotalDue").textContent = formatBDT(totalDue);
+      document.getElementById("monthlyClosedDays").textContent = closedCount;
+
+      const byDate = {};
+      monthInvs.forEach(inv => {
+        if (!byDate[inv.date]) {
+          byDate[inv.date] = { date: inv.date, count: 0, total: 0, paid: 0, due: 0 };
+        }
+        byDate[inv.date].count += 1;
+        byDate[inv.date].total += inv.grandTotal;
+        byDate[inv.date].paid += inv.paid;
+        byDate[inv.date].due += inv.due;
+      });
+
+      const dates = Object.keys(byDate).sort().reverse();
+      const tbody = document.getElementById("monthlyBreakdownBody");
+      if (dates.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--muted); padding:18px;">এই মাসে কোনো সেলস রেকর্ড নেই।</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = dates.map(d => {
+        const row = byDate[d];
+        const isClosed = closedDays.includes(d);
+        return `
+          <tr>
+            <td><strong>${row.date}</strong></td>
+            <td>${row.count}</td>
+            <td>${formatBDT(row.total)}</td>
+            <td>${formatBDT(row.paid)}</td>
+            <td>${formatBDT(row.due)}</td>
+            <td>
+              <span class="status-badge ${isClosed ? "status-closed" : "status-open"}">
+                ${isClosed ? "Day Closed" : "Open"}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function exportBackupJSON() {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        brand: "Laundrywala",
+        services,
+        invoices,
+        customers,
+        closedDays
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `laundrywala-backup-${getTodayISO()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importBackupJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!data || !Array.isArray(data.invoices) || !Array.isArray(data.customers)) {
+            alert("সঠিক Laundrywala ব্যাকআপ ফাইল নয়।");
+            return;
+          }
+          if (!confirm("ব্যাকআপ ফাইল থেকে বর্তমান ডাটা রিস্টোর করতে চাচ্ছো?")) return;
+
+          if (Array.isArray(data.services) && data.services.length > 0) {
+            services = data.services;
+            saveData(STORAGE_KEYS.services, services);
+          }
+          invoices = data.invoices;
+          customers = data.customers;
+          closedDays = Array.isArray(data.closedDays) ? data.closedDays : [];
+
+          saveData(STORAGE_KEYS.invoices, invoices);
+          saveData(STORAGE_KEYS.customers, customers);
+          saveData(STORAGE_KEYS.closedDays, closedDays);
+
+          updateCatalogCountBadge();
+          updateHeaderStatus();
+          updateNextInvLabel();
+          refreshCustomerDatalist();
+          renderServices();
+          renderMonthlyReport();
+          alert("ব্যাকআপ সফলভাবে রিস্টোর হয়েছে!");
+        } catch {
+          alert("ফাইলটি পড়তে সমস্যা হয়েছে।");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = "";
+    }
+
+    function updateHeaderStatus() {
+      const today = getTodayISO();
+      document.getElementById("todayDatePill").textContent = "Date: " + today;
+      const isClosed = closedDays.includes(today);
+      const pill = document.getElementById("dayStatusPill");
+      pill.textContent = isClosed ? "Day: Closed" : "Day: Open";
+    }
+
+    function updateNextInvLabel() {
+      document.getElementById("nextInvLabel").textContent = "Inv #" + ("LW-" + String(invoices.length + 1001));
+    }
+
+    (function init() {
+      const today = getTodayISO();
+      document.getElementById("deliveryDate").value = getDefaultDeliveryISO();
+      document.getElementById("monthPicker").value = today.slice(0, 7);
+      updateCatalogCountBadge();
+      updateHeaderStatus();
+      updateNextInvLabel();
+      renderServices();
+      renderCart();
+      refreshCustomerDatalist();
+    })();
+  </script>
+</body>
+</html>
